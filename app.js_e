@@ -1,0 +1,27 @@
+
+var express = require('express')
+    , users = require('./models/Users')
+    , http = require('http')
+    , todoDao = require("./models/DbUsers");
+
+
+var app = express();
+
+//urlÂ·ÓÉ
+app.post('/jobs/new', users.new);
+app.get('/jobs/:id', users.view);
+app.get('/jobs/:id/edit', users.edit);
+app.post('/jobs/:id/edit', users.save);
+app.get('/jobs/:id/delete', users.delete);
+app.get('/jobs/:id/finish', users.finish);
+
+todoDao.connect(function(error){
+    if (error) throw error;
+});
+app.on('close', function(errno) {
+    todoDao.disconnect(function(err) { });
+});
+
+http.createServer(app).listen(8888, function(){
+    console.log("Express server listening on port " + app.get('port'));
+});
