@@ -5,14 +5,6 @@
 
 var db = require('./DbUsers');
 
-exports.index = function (req, res, next) {
-    db.allTodos(function (err, todos) {
-        if (err) {
-            return next(err);
-        }
-        res.render('index.html', {todos: todos});
-    });
-};
 
 exports.new = function (req, res, next) {
     var title = req.body.title || '';
@@ -31,6 +23,36 @@ exports.new = function (req, res, next) {
 exports.view = function (req, res, next) {
     res.redirect('/');
 };
+
+exports.all = function (req, res, next) {
+    console.log("enter query all for jobs");
+    db.allUsers(function (err, row) {
+        if (err) {
+            return next(err);
+        }
+        if (!row) {
+            return next();
+        }
+    });
+};
+
+//
+//exports.all = function (req, res, next) {
+//    console.log("enter query all for jobs");
+//    res.setHeader('Access-Control-Allow-Origin','*');
+//    db.find().limit(20).sort({postedOn : -1} , function(err , success){
+//        console.log('Response success '+success);
+//        console.log('Response error '+err);
+//        if(success){
+//            res.send(200 , success);
+//            return next();
+//        }else{
+//            console.log("error on query all for jobs");
+//            return next(err);
+//        }
+//    });
+//}
+
 
 exports.edit = function (req, res, next) {
     var id = req.params.id;
