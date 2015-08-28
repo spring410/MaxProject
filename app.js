@@ -14,115 +14,34 @@ server.use(restify.queryParser());
 server.use(restify.bodyParser());
 server.use(restify.CORS());
 
-var connection_string = '127.0.0.1:27017/test';
-var db = mongojs(connection_string, ['myapp']);
-var jobs = db.collection("jobs");
+//var PATH = '/jobs'
+//server.get({path : PATH , version : '0.0.1'} , findAllJobs);
+//server.get({path : PATH +'/:jobId' , version : '0.0.1'} , findJob);
+//server.post({path : PATH , version: '0.0.1'} ,postNewJob);
+//server.del({path : PATH +'/:jobId' , version: '0.0.1'} ,deleteJob);
 
 
+var db = require("./models/DbUsers");
 
-function findAllJobs(req, res , next){
-    console.log('enter find all jobs...');
-    res.setHeader('Access-Control-Allow-Origin','*');
-    jobs.find().limit(20).sort({postedOn : -1} , function(err , success){
-        if(success){
-            console.log('Response success '+success);
-            res.send(200 , success);
-            return next();
-        }else{
-            console.log('Response error '+err);
-            return next(err);
-        }
+var users = require('./models/Users')
+var dbUsers = require("./models/DbUsers");
 
-    });
+//var PATH = '/jobs'
+server.post('/jobs/new', users.new);
+server.get('/jobs/:id', users.view);
+server.get('/jobs', users.find);
+server.get('/jobs/:id/edit', users.edit);
+server.post('/jobs/:id/edit', users.save);
+server.get('/jobs/:id/delete', users.delete);
+server.get('/jobs/:id/finish', users.finish);
 
-}
+dbUsers.connect(function(error){
+    if (error) throw error;
+});
 
-function findJob(req, res , next){
-    res.setHeader('Access-Control-Allow-Origin','*');
-    jobs.findOne({_id:mongojs.ObjectId(req.params.jobId)} , function(err , success){
-        console.log('Response success '+success);
-        console.log('Response error '+err);
-        if(success){
-            res.send(200 , success);
-            return next();
-        }
-        return next(err);
-    })
-}
-
-function postNewJob(req , res , next){
-    var job = {};
-    job.title = req.params.title;
-    job.description = req.params.description;
-    job.location = req.params.location;
-    job.postedOn = new Date();
-
-    res.setHeader('Access-Control-Allow-Origin','*');
-
-    jobs.save(job , function(err , success){
-        console.log('Response success '+success);
-        console.log('Response error '+err);
-        if(success){
-            res.send(201 , job);
-            return next();
-        }else{
-            return next(err);
-        }
-    });
-}
-
-function deleteJob(req , res , next){
-    res.setHeader('Access-Control-Allow-Origin','*');
-    jobs.remove({_id:mongojs.ObjectId(req.params.jobId)} , function(err , success){
-        console.log('Response success '+success);
-        console.log('Response error '+err);
-        if(success){
-            res.send(204);
-            return next();
-        } else{
-            return next(err);
-        }
-    })
-
-}
-
-var PATH = '/jobs'
-server.get({path : PATH , version : '0.0.1'} , findAllJobs);
-server.get({path : PATH +'/:jobId' , version : '0.0.1'} , findJob);
-server.post({path : PATH , version: '0.0.1'} ,postNewJob);
-server.del({path : PATH +'/:jobId' , version: '0.0.1'} ,deleteJob);
-
-
-
-///
-//var db = require("./models/DbUsers");
-//
-//db.connect(function(error){
-//    if (error) throw error;
-//});
-//
-//server.on('close', function(errno) {
-//    db.disconnect(function(err) { });
-//});
-//var users = require('./models/Users')
-//var todoDao = require("./models/DbUsers");
-
-//server.post('/jobs/new', users.new);
-//server.get('/jobs/:id', users.view);
-//server.get('/jobs', users.all);
-//server.get('/jobs/:id/edit', users.edit);
-//server.post('/jobs/:id/edit', users.save);
-//server.get('/jobs/:id/delete', users.delete);
-//server.get('/jobs/:id/finish', users.finish);
-//
-//todoDao.connect(function(error){
-//    if (error) throw error;
-//});
-//
-//server.on('close', function(errno) {
-//    todoDao.disconnect(function(err) { });
-//});
-//
+server.on('close', function(errno) {
+    dbUsers.disconnect(function(err) { });
+});
 
 server.listen(port ,ip_addr, function(){
     console.log('%s listening at %s ', server.name , server.url);

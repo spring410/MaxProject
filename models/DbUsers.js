@@ -38,6 +38,7 @@ exports.setup = function(callback) { callback(null); }
 
 //定义todo对象模型
 var UsersSchema = new Schema({
+    id:Number,
     name : String,
     email: String,
     phone:String,
@@ -52,8 +53,8 @@ var UsersSchema = new Schema({
 });
 
 //访问todo对象模型
-mongoose.model('Users', UsersSchema);
-var User = mongoose.model('Users');
+mongoose.model('users', UsersSchema);
+var User = mongoose.model('users');
 
 //exports.emptyNote = { "_id": "", author: "", note: "" };
 
@@ -118,7 +119,7 @@ exports.editFinished = function(id, finished, callback) {
     });
 }
 
-exports.allUsers = function(callback) {
+exports.find = function(callback) {
     User.find({}, callback);
 }
 
