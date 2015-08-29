@@ -1,14 +1,11 @@
 
 var restify = require('restify');
-var mongojs = require("mongojs");
-
 var ip_addr = '127.0.0.1';
 var port    =  '8080';
 
 var server = restify.createServer({
     name : "myapp"
 });
-
 
 server.use(restify.queryParser());
 server.use(restify.bodyParser());
@@ -22,14 +19,18 @@ server.use(restify.CORS());
 
 
 var db = require("./models/DbUsers");
-
 var users = require('./models/Users')
 var dbUsers = require("./models/DbUsers");
 
-//var PATH = '/jobs'
-server.post('/jobs/new', users.new);
-server.get('/jobs/:id', users.view);
-server.get('/jobs', users.find);
+
+var PATH_USERS = '/v100/users'
+server.post({path:PATH_USERS, cmd:'/new'}, users.new);
+
+server.get({path:PATH_USERS + '/id' + '/:id'}, users.findById);
+
+server.get({path:PATH_USERS + '/name' + '/:id'}, users.findByName);
+
+server.get({path:PATH_USERS}, users.all);
 server.get('/jobs/:id/edit', users.edit);
 server.post('/jobs/:id/edit', users.save);
 server.get('/jobs/:id/delete', users.delete);

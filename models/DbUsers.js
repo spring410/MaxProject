@@ -58,7 +58,7 @@ var User = mongoose.model('users');
 
 //exports.emptyNote = { "_id": "", author: "", note: "" };
 
-exports.add = function(title,callback) {
+exports.add = function(title, callback) {
     var newUser = new User();
     newUser.title = title;
     newUser.save(function(err){
@@ -137,7 +137,19 @@ exports.forAll = function(doEach, done) {
 }
 
 var findUserById = exports.findUserById = function(id,callback){
-    User.findOne({_id:id},function(err,doc){
+    console.log("enter findUserById,id=" + id);
+    User.findOne({id:id},function(err,doc){
+        if (err) {
+            util.log('FATAL '+ err);
+            callback(err, null);
+        }
+        callback(null, doc);
+    });
+}
+
+var findUserByName = exports.findUserByName = function(name,callback){
+    console.log("enter findUserByName, name=" + id);
+    User.findOne({name:id},function(err,doc){
         if (err) {
             util.log('FATAL '+ err);
             callback(err, null);

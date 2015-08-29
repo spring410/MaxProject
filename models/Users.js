@@ -5,49 +5,60 @@
 
 var db = require('./DbUsers');
 
-
 exports.new = function (req, res, next) {
+    console.log("enter to add new user..." + req);
     var title = req.body.title || '';
     title = title.trim();
-    if (!title) {
-        return res.render('error.html', {message: '标题是必须的'});
-    }
-    db.add(title, function (err, row) {
-        if (err) {
-            return next(err);
-        }
-        res.redirect('/');
-    });
-};
 
-exports.view = function (req, res, next) {
-    res.redirect('/');
-};
-
-//exports.all = function (req, res, next) {
-//    console.log("enter query all for jobs");
-//    db.allUsers(function (err, row) {
-//        if (err) {
-//            return next(err);
-//        }
-//        if (!row) {
-//            return next();
-//        }
-//    });
-//};
-
-
-exports.find = function (req, res, next) {
-    console.log("enter query all for jobs");
-    res.setHeader('Access-Control-Allow-Origin','*');
-    db.find(function(err , success){
-        console.log('Response success '+success);
-        console.log('Response error '+err);
+    db.add(title, function (err, success) {
         if(success){
             res.send(200 , success);
             return next();
+        }else {
+            console.log('Response error '+err);
+            return next(err);
+        }
+    });
+};
+
+exports.findById = function (req, res, next) {
+    console.log("enter query findById..." + req);
+    var id = req.params.id;
+    db.findUserById(id, function(err, success){
+        if(success){
+            res.send(200 , success);
+            return next();
+        }else {
+            console.log('Response error '+err);
+            return next(err);
+        }
+    });
+}
+
+exports.findByName = function (req, res, next) {
+    console.log("enter query findByName..." + req);
+    var name = req.params.id;
+    db.findUserByName(name, function(err, success){
+        if(success){
+            res.send(200 , success);
+            return next();
+        }else {
+            console.log('Response error '+err);
+            return next(err);
+        }
+    });
+}
+
+exports.all = function (req, res, next) {
+    console.log("enter query all..." + req);
+    //res.setHeader('Access-Control-Allow-Origin','*');
+    db.find(function(err , success){
+        if(success){
+            console.log('Response success '+success);
+            res.send(200 , success);
+            return next();
         }else{
-            console.log("error on query all for jobs");
+            console.log('Response error '+err);
             return next(err);
         }
     });
