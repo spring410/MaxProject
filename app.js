@@ -1,3 +1,6 @@
+var express = require('express');
+var bodyParser = require('body-parser');
+var URL = require('url');
 
 var restify = require('restify');
 var ip_addr = '127.0.0.1';
@@ -11,30 +14,26 @@ server.use(restify.queryParser());
 server.use(restify.bodyParser());
 server.use(restify.CORS());
 
-//var PATH = '/jobs'
-//server.get({path : PATH , version : '0.0.1'} , findAllJobs);
-//server.get({path : PATH +'/:jobId' , version : '0.0.1'} , findJob);
-//server.post({path : PATH , version: '0.0.1'} ,postNewJob);
-//server.del({path : PATH +'/:jobId' , version: '0.0.1'} ,deleteJob);
-
+server.use(bodyParser.json({limit: '1mb'}));
+server.use(bodyParser.urlencoded({
+    extended: true
+}));
 
 var db = require("./models/DbUsers");
 var users = require('./models/Users')
 var dbUsers = require("./models/DbUsers");
 
-
 var PATH_USERS = '/v100/users'
-server.post({path:PATH_USERS, cmd:'/new'}, users.new);
 
+server.get({path:PATH_USERS}, users.findAll);
 server.get({path:PATH_USERS + '/id' + '/:id'}, users.findById);
-
 server.get({path:PATH_USERS + '/name' + '/:id'}, users.findByName);
 
-server.get({path:PATH_USERS}, users.all);
-server.get('/jobs/:id/edit', users.edit);
-server.post('/jobs/:id/edit', users.save);
-server.get('/jobs/:id/delete', users.delete);
-server.get('/jobs/:id/finish', users.finish);
+server.post({path:PATH_USERS + '/add'}, users.add);
+server.post({path:PATH_USERS + '/del' + '/:id'}, users.deleteById);
+
+server.post({path:PATH_USERS + '/id' + '/:id'}, users.updateById);
+server.post({path:PATH_USERS + '/name' + '/:id'}, users.updateByName);
 
 dbUsers.connect(function(error){
     if (error) throw error;
@@ -47,4 +46,3 @@ server.on('close', function(errno) {
 server.listen(port ,ip_addr, function(){
     console.log('%s listening at %s ', server.name , server.url);
 });
-

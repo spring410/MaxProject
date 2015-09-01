@@ -2,15 +2,17 @@
  * Created by Administrator on 2015/8/27.
  */
 
-
 var db = require('./DbUsers');
+var URL = require('url');
+var Querystring = require('querystring');
 
-exports.new = function (req, res, next) {
-    console.log("enter to add new user..." + req);
-    var title = req.body.title || '';
-    title = title.trim();
+exports.add = function (req, res, next) {
+    console.log("enter to add new user, req=" + req);
 
-    db.add(title, function (err, success) {
+    var data = URL.parse(req.url).query;
+    console.log("enter to add new user, url2=" + data);
+
+    db.add(data, function (err, success) {
         if(success){
             res.send(200 , success);
             return next();
@@ -49,7 +51,7 @@ exports.findByName = function (req, res, next) {
     });
 }
 
-exports.all = function (req, res, next) {
+exports.findAll = function (req, res, next) {
     console.log("enter query all..." + req);
     //res.setHeader('Access-Control-Allow-Origin','*');
     db.find(function(err , success){
@@ -78,7 +80,7 @@ exports.edit = function (req, res, next) {
     });
 };
 
-exports.save = function (req, res, next) {
+exports.updateById = function (req, res, next) {
     var id = req.params.id;
     var title = req.body.title || '';
     title = title.trim();
@@ -93,7 +95,22 @@ exports.save = function (req, res, next) {
     });
 };
 
-exports.delete = function (req, res, next) {
+exports.updateByName = function (req, res, next) {
+    var id = req.params.id;
+    var title = req.body.title || '';
+    title = title.trim();
+    if (!title) {
+        return res.render('error.html', {message: '标题是必须的'});
+    }
+    db.editTitle(id,title,function (err, result) {
+        if (err) {
+            return next(err);
+        }
+        res.redirect('/');
+    });
+};
+
+exports.deleteById = function (req, res, next) {
     var id = req.params.id;
     db.delete(id, function (err) {
         if (err) {
