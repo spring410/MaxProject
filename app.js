@@ -19,12 +19,11 @@ server.use(bodyParser.urlencoded({
     extended: true
 }));
 
-var db = require("./models/DbUsers");
-var users = require('./models/Users')
-var dbUsers = require("./models/DbUsers");
+var db = require("./models/usersdb");
+var users = require('./models/userinfo')
+var dbUsers = require("./models/usersdb");
 
 var PATH_USERS = '/v100/users'
-
 server.get({path:PATH_USERS}, users.findAll);
 server.get({path:PATH_USERS + '/id' + '/:id'}, users.findById);
 server.get({path:PATH_USERS + '/name' + '/:id'}, users.findByName);
