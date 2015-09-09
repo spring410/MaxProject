@@ -23,7 +23,7 @@ exports.signup = function (req, res, next) {
 };
 
 exports.signin = function (req, res, next) {
-    console.log("enter to add new user, req=" + req);
+    console.log("enter to signin, req=" + req);
     var data = URL.parse(req.url).query;
     db.signin(data, function (err, success) {
         if(success){

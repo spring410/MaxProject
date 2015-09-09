@@ -3,6 +3,8 @@ var util = require('util');
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Querystring = require('querystring');
+var crypto_pwd = require('crypto');
+var SecrectKey = "!@#imakeit123"
 
 
 exports.connect = function(callback) {
@@ -75,7 +77,16 @@ exports.add = function(rdata, callback) {
                     console.log("try to add account.");
                     var newUser = new User();
                     newUser.account = account;
-                    newUser.password = password;
+                    var cipher  = crypto_pwd.createCipher('aes-256-cbc', SecrectKey)
+                    var cryptedpwd = cipher.update(password, 'utf8','hex');
+                    cryptedpwd += cipher.final('hex');
+                    console.log("--pwd---:" + cryptedpwd);
+                    //var decipher  = crypto_pwd.createDecipher('aes-256-cbc', SecrectKey)
+                    //var decpwd = decipher.update(cryptedpwd, 'hex', 'utf8')
+                    //decpwd += decipher.final('utf8');
+                    //console.log("--pwdtext---:" + decpwd);
+                    console.log("try to add account.");
+                    newUser.password = cryptedpwd;
                     newUser.display_name = display_name;
                     console.log("try to add an new user info =" + newUser.toString());
                     newUser.save(function(err){
@@ -122,7 +133,13 @@ exports.signin = function(rdata, callback)
                 }
                 else
                 {
-                    if(doc.password == password)
+                    console.log("--password---:" + password);
+                    var decipher  = crypto_pwd.createDecipher('aes-256-cbc', SecrectKey)
+                    var decpwd = decipher.update(doc.password, 'hex', 'utf8')
+                    decpwd += decipher.final('utf8');
+                    console.log("--pwdtext---:" + decpwd);
+
+                    if(password == decpwd)
                     {
                         callback(null, true);
                     }

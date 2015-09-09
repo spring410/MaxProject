@@ -24,8 +24,7 @@ var users = require('./models/userinfo')
 var dbUsers = require("./models/usersdb");
 
 var PATH_USERS = '/v100/users'
-server.get({path:PATH_USERS}, users.findAll);
-server.get({path:PATH_USERS + '/_id' + '/:id'}, users.findById);
+
 server.get({path:PATH_USERS + '/accounts' + '/:id'}, users.findByAccount);
 server.get({path:PATH_USERS + '/displaynames' + '/:id'}, users.findByName);
 
@@ -34,6 +33,8 @@ server.post({path:PATH_USERS + '/signin'}, users.signin);
 server.post({path:PATH_USERS + '/setpassword'}, users.setpassword);
 server.post({path:PATH_USERS + '/accounts' + '/:id'}, users.updateByAccount);
 
+//server.get({path:PATH_USERS}, users.findAll);
+//server.get({path:PATH_USERS + '/_id' + '/:id'}, users.findById);
 //server.post({path:PATH_USERS + '/id' + '/:id'}, users.updateById);
 //server.post({path:PATH_USERS + '/del' + '/:id'}, users.deleteById);
 
