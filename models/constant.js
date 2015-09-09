@@ -4,7 +4,7 @@
 
 exports.ok = 200;
 exports.failed = 400;
-exports.none = 401;
+exports.noaccess = 401;
 exports.invalid_params = 402;
 
 exports.invalid_params_str = "invalid_params";

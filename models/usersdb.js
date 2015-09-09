@@ -5,6 +5,9 @@ var Schema = mongoose.Schema;
 var Querystring = require('querystring');
 var crypto_pwd = require('crypto');
 var SecrectKey = "!@#imakeit123"
+var tokenSecret = "token_!@#123";
+var moment = require("moment");
+var jwt = require('jwt-simple');
 
 
 exports.connect = function(callback) {
@@ -17,7 +20,6 @@ exports.disconnect = function(callback) {
 
 exports.setup = function(callback) { callback(null); }
 
-
 var UsersSchema = new Schema({
     display_name : String,
     account: String,
@@ -29,6 +31,17 @@ var UsersSchema = new Schema({
 var collectionName = 'users';
 mongoose.model(collectionName, UsersSchema);
 var User = mongoose.model(collectionName);
+
+
+var TokensSchema = new Schema({
+    token : String,
+    account: String,
+    create_date : {type: Date, default: Date.now},
+    expire_date:  {type: Date, default: Date.now}
+});
+var TokenCollectionName = 'tokens';
+mongoose.model(TokenCollectionName, UsersSchema);
+var Tokens = mongoose.model(TokenCollectionName);
 
 exports.add = function(rdata, callback) {
     var data = Querystring.parse(rdata);
@@ -141,7 +154,14 @@ exports.signin = function(rdata, callback)
 
                     if(password == decpwd)
                     {
-                        callback(null, true);
+                        //succeed to sign in , and then return token
+                        var expires = moment().add('days', 30).valueOf();
+                        var token = jwt.encode({ account: account, exp:expires}, tokenSecret);
+                        console.log("--token---:" + token);
+                        console.log("--expires---:" + expires);
+                        var decoded = jwt.decode(token, tokenSecret);
+                        console.log("--decoded token---:" + decoded);
+                        callback(null, token);
                     }
                     else
                     {
@@ -291,6 +311,39 @@ exports.findUserByDisplayName = function(name, callback){
         callback(null, doc);
     });
 }
+
+exports.checkTokenValid = function(token, callback){
+
+    console.log("--entry checkTokenValid--:");
+    var decoded = jwt.decode(token, tokenSecret);
+    if(decoded)
+    {
+        console.log("--entry checkTokenValid decode token--:" + decoded);
+        var data = Querystring.parse(decoded);
+        var account = data['account'];
+        var exp = data['exp'];
+
+        console.log("--decoded account---:" + decoded.account);
+        console.log("--decoded exp---:" + decoded.exp);
+        var bValid = moment(decoded.exp).isAfter(moment());
+        if(bValid)
+        {
+            callback(null, true);
+        }
+        else
+        {
+            callback('token is expire');
+        }
+
+    }
+    else
+    {
+        console.log("--Erron on decode token--:");
+        callback("token failed")
+    }
+
+}
+
 
 
 exports.delete = function(id, callback) {

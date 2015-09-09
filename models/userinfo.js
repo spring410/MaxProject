@@ -71,16 +71,39 @@ exports.findByAccount = function (req, res, next) {
     console.log("enter query findByAccount..." + req);
     var name = req.params.id;
     console.log("enter query findByAccount name=" + name);
-    db.findUserByAccount(name, function(err, success){
-        if(success){
-            res.send(constant.ok , success);
-            return next();
-        }else {
-            console.log('Response error '+err);
-            res.send(constant.failed , success);
-            return next(err);
-        }
-    });
+
+    var rdata = URL.parse(req.url).query;
+    var data = Querystring.parse(rdata);
+    var token = data.token;
+    console.log("enter query findByAccount token=" + token);
+    if(token)
+    {
+        db.checkTokenValid(token, function(err, success){
+            if(err)
+            {
+                res.send(constant.noaccess);
+            }
+            else
+            {
+                db.findUserByAccount(name, function(err, success){
+                    if(success){
+                        res.send(constant.ok , success);
+                        return next();
+                    }else {
+                        console.log('Response error '+err);
+                        res.send(constant.failed , success);
+                        return next(err);
+                    }
+                });
+            }
+        });
+    }
+    else
+    {
+        res.send(constant.failed, constant.invalid_params_str);
+    }
+
+
 }
 
 exports.findByName = function (req, res, next) {
