@@ -29,11 +29,14 @@ server.get({path:PATH_USERS + '/_id' + '/:id'}, users.findById);
 server.get({path:PATH_USERS + '/accounts' + '/:id'}, users.findByAccount);
 server.get({path:PATH_USERS + '/displaynames' + '/:id'}, users.findByName);
 
-server.post({path:PATH_USERS + '/add'}, users.add);
-server.post({path:PATH_USERS + '/del' + '/:id'}, users.deleteById);
+server.post({path:PATH_USERS + '/signup'}, users.signup);
+server.post({path:PATH_USERS + '/signin'}, users.signin);
+server.post({path:PATH_USERS + '/setpassword'}, users.setpassword);
+server.post({path:PATH_USERS + '/accounts' + '/:id'}, users.updateByAccount);
 
-server.post({path:PATH_USERS + '/id' + '/:id'}, users.updateById);
-server.post({path:PATH_USERS + '/name' + '/:id'}, users.updateByName);
+//server.post({path:PATH_USERS + '/id' + '/:id'}, users.updateById);
+//server.post({path:PATH_USERS + '/del' + '/:id'}, users.deleteById);
+
 
 dbUsers.connect(function(error){
     if (error) throw error;
