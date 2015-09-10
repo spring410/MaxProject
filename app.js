@@ -31,7 +31,7 @@ server.get({path:PATH_USERS + '/displaynames' + '/:id'}, users.findByName);
 server.post({path:PATH_USERS + '/signup'}, users.signup);
 server.post({path:PATH_USERS + '/signin'}, users.signin);
 server.post({path:PATH_USERS + '/setpassword'}, users.setpassword);
-server.post({path:PATH_USERS + '/accounts' + '/:id'}, users.updateByAccount);
+server.post({path:PATH_USERS + '/updateaccounts' + '/:id'}, users.updateByAccount);
 
 //server.get({path:PATH_USERS}, users.findAll);
 //server.get({path:PATH_USERS + '/_id' + '/:id'}, users.findById);

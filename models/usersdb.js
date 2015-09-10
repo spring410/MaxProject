@@ -48,9 +48,9 @@ exports.add = function(rdata, callback) {
     if(null != data)
     {
         console.log("try to add an new user.");
-        var account = data["account"];
-        var password = data["password"];
-        var display_name = data["display_name"];
+        var account = data.account;
+        var password = data.password;
+        var display_name = data.display_name;
 
         console.log("try to add an new user,account=" + account);
         console.log("try to add an new user,password=" + password);
@@ -121,9 +121,9 @@ exports.add = function(rdata, callback) {
     }
 }
 
-exports.signin = function(rdata, callback)
+exports.signin = function(qdata, callback)
 {
-    var data = Querystring.parse(rdata);
+    var data = Querystring.parse(qdata);
     if(!data)
     {
         callback("Invalid params");
@@ -155,7 +155,7 @@ exports.signin = function(rdata, callback)
                     if(password == decpwd)
                     {
                         //succeed to sign in , and then return token
-                        var expires = moment().add('days', 30).valueOf();
+                        var expires = moment().add('days', 15).valueOf();
                         var token = jwt.encode({ account: account, exp:expires}, tokenSecret);
                         console.log("--token---:" + token);
                         console.log("--expires---:" + expires);
@@ -223,7 +223,7 @@ exports.setpassword = function(rdata, callback)
 }
 
 
-exports.updateByAccount = function(account, rdata, callback) {
+exports.updateByAccount = function(account, data, callback) {
 
     exports.findUserByAccount(account, function(err, doc)
     {
@@ -233,17 +233,25 @@ exports.updateByAccount = function(account, rdata, callback) {
         }
         else
         {
-            var data = Querystring.parse(rdata);
             if(null != data) {
-                var text = data["text"];
-                doc.text = text;
-                doc.save(function(err) {
-                    if (err) {
-                        callback(err);
-                    } else {
-                        callback(null, true);
-                    }
-                });
+                console.log("updateByAccount , data=" + data);
+                var text = data.text;
+                console.log("updateByAccount , text=" + text);
+                if(text)
+                {
+                    doc.text = text;
+                    doc.save(function(err) {
+                        if (err) {
+                            callback(err);
+                        } else {
+                            callback(null, true);
+                        }
+                    });
+                }
+                else{
+                    callback("param text is null");
+                }
+
             }
         }
     });
@@ -290,14 +298,24 @@ exports.findUserById = function(id,callback){
     });
 }
 
-exports.findUserByAccount = function(account,callback){
+exports.findUserByAccount = function(account, callback){
     console.log("enter findUserByAccount, account=" + account);
     User.findOne({account:account},function(err, doc){
         if (err) {
             //util.log('FATAL '+ err);
-            callback(err, null);
+            console.log("Error on findUserByAccount() Not found the account=" + account);
+            callback("Error and not found the account=" + account);
         }
-        callback(null, doc);
+        else if(doc)
+        {
+            console.log("findUserByAccount() Got it ");
+            callback(null, doc);
+        }
+        else
+        {
+            console.log("findUserByAccount() Not found the account=" + account);
+            callback("Not found the account=" + account);
+        }
     });
 }
 
@@ -312,29 +330,33 @@ exports.findUserByDisplayName = function(name, callback){
     });
 }
 
-exports.checkTokenValid = function(token, callback){
+exports.checkTokenValid = function(account, token, callback){
 
-    console.log("--entry checkTokenValid--:");
+    console.log("entry checkTokenValid--:");
     var decoded = jwt.decode(token, tokenSecret);
     if(decoded)
     {
-        console.log("--entry checkTokenValid decode token--:" + decoded);
-        var data = Querystring.parse(decoded);
-        var account = data['account'];
-        var exp = data['exp'];
+        //console.log("--entry checkTokenValid decode token--:" + decoded);
+        //console.log("--decoded account---:" + decoded.account);
+        //console.log("--decoded exp---:" + decoded.exp);
 
-        console.log("--decoded account---:" + decoded.account);
-        console.log("--decoded exp---:" + decoded.exp);
-        var bValid = moment(decoded.exp).isAfter(moment());
-        if(bValid)
+        var accountInToken = decoded.account;
+        var expInToken = decoded.exp;
+        if(accountInToken != account)
         {
-            callback(null, true);
+            callback('Account is not match, account=' + account + ", in token account=" + accountInToken);
         }
-        else
-        {
-            callback('token is expire');
+        else{
+            var bValid = moment(expInToken).isAfter(moment());
+            if(bValid)
+            {
+                callback(null, true);
+            }
+            else
+            {
+                callback('token is expire');
+            }
         }
-
     }
     else
     {

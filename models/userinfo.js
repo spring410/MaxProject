@@ -24,8 +24,8 @@ exports.signup = function (req, res, next) {
 
 exports.signin = function (req, res, next) {
     console.log("enter to signin, req=" + req);
-    var data = URL.parse(req.url).query;
-    db.signin(data, function (err, success) {
+    var qdata = URL.parse(req.url).query;
+    db.signin(qdata, function (err, success) {
         if(success){
             res.send(constant.ok , success);
             return next();
@@ -52,7 +52,6 @@ exports.setpassword = function (req, res, next) {
     });
 };
 
-
 exports.findById = function (req, res, next) {
     console.log("enter query findById..." + req);
     var id = req.params.id;
@@ -67,25 +66,26 @@ exports.findById = function (req, res, next) {
         }
     });
 }
+
 exports.findByAccount = function (req, res, next) {
     console.log("enter query findByAccount..." + req);
-    var name = req.params.id;
-    console.log("enter query findByAccount name=" + name);
+    var account = req.params.id;
+    console.log("enter query findByAccount name=" + account);
 
-    var rdata = URL.parse(req.url).query;
-    var data = Querystring.parse(rdata);
+    var qdata = URL.parse(req.url).query;
+    var data = Querystring.parse(qdata);
     var token = data.token;
     console.log("enter query findByAccount token=" + token);
     if(token)
     {
-        db.checkTokenValid(token, function(err, success){
+        db.checkTokenValid(account,token, function(err, success){
             if(err)
             {
                 res.send(constant.noaccess);
             }
             else
             {
-                db.findUserByAccount(name, function(err, success){
+                db.findUserByAccount(account, function(err, success){
                     if(success){
                         res.send(constant.ok , success);
                         return next();
@@ -102,8 +102,6 @@ exports.findByAccount = function (req, res, next) {
     {
         res.send(constant.failed, constant.invalid_params_str);
     }
-
-
 }
 
 exports.findByName = function (req, res, next) {
@@ -154,24 +152,37 @@ exports.updateById = function (req, res, next) {
 };
 
 exports.updateByAccount = function (req, res, next) {
-
+    console.log("enter update account");
     var account = req.params.id;
-    var data = URL.parse(req.url).query;
-    if (!data || !account) {
-        res.send(constant.failed, constant.null_params_str);
+    var rdata = URL.parse(req.url).query;
+    var data = Querystring.parse(rdata);
+    var token = data.token;
+    if(token) {
+        db.checkTokenValid(account, token, function (err, success) {
+            if (err) {
+                console.log("Erron:" + err);
+                res.send(constant.noaccess);
+            }
+            else {
+                if (!account) {
+                    res.send(constant.failed, constant.null_params_str);
+                }
+                db.updateByAccount(account, data, function (err, success) {
+                    if (err) {
+                        res.send(constant.failed, success);
+                        return next(err);
+                    }
+                    else {
+                        res.send(200, success);
+                    }
+                });
+            }
+        });
     }
-    db.updateByAccount(account, data, function (err, success)
-    {
-        if (err)
-        {
-            res.send(constant.failed , success);
-            return next(err);
-        }
-        else
-        {
-            res.send(200 , success);
-        }
-    });
+    else{
+        res.send(constant.failed, constant.invalid_params_str);
+    }
+
 };
 
 exports.deleteById = function (req, res, next) {
