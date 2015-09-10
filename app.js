@@ -19,9 +19,9 @@ server.use(bodyParser.urlencoded({
     extended: true
 }));
 
-var db = require("./models/usersdb");
+var db = require("./models/basedb");
 var users = require('./models/userinfo')
-var dbUsers = require("./models/usersdb");
+
 
 var PATH_USERS = '/v100/users'
 
@@ -39,12 +39,12 @@ server.post({path:PATH_USERS + '/updateaccounts' + '/:id'}, users.updateByAccoun
 //server.post({path:PATH_USERS + '/del' + '/:id'}, users.deleteById);
 
 
-dbUsers.connect(function(error){
+db.connect(function(error){
     if (error) throw error;
 });
 
 server.on('close', function(errno) {
-    dbUsers.disconnect(function(err) { });
+    db.disconnect(function(err) { });
 });
 
 server.listen(port ,ip_addr, function(){

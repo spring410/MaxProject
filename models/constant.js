@@ -9,3 +9,13 @@ exports.invalid_params = 402;
 
 exports.invalid_params_str = "invalid_params";
 exports.null_params_str = "null_params_str";
+
+
+
+
+
+
+
+
+exports.secrectKey = "!@#imakeit123"
+exports.tokenSecret = "token_!@#123";

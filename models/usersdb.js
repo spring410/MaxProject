@@ -1,25 +1,13 @@
-
 var util = require('util');
-var mongoose = require('mongoose');
-var Schema = mongoose.Schema;
 var Querystring = require('querystring');
 var crypto_pwd = require('crypto');
-var SecrectKey = "!@#imakeit123"
-var tokenSecret = "token_!@#123";
 var moment = require("moment");
 var jwt = require('jwt-simple');
 
+var mongoose = require('./basedb').db;
+var constant = require('./constant');
 
-exports.connect = function(callback) {
-    mongoose.connect('mongodb://localhost/test');
-}
-
-exports.disconnect = function(callback) {
-    mongoose.disconnect(callback);
-}
-
-exports.setup = function(callback) { callback(null); }
-
+var Schema = mongoose.Schema;
 var UsersSchema = new Schema({
     display_name : String,
     account: String,
@@ -31,17 +19,6 @@ var UsersSchema = new Schema({
 var collectionName = 'users';
 mongoose.model(collectionName, UsersSchema);
 var User = mongoose.model(collectionName);
-
-
-var TokensSchema = new Schema({
-    token : String,
-    account: String,
-    create_date : {type: Date, default: Date.now},
-    expire_date:  {type: Date, default: Date.now}
-});
-var TokenCollectionName = 'tokens';
-mongoose.model(TokenCollectionName, UsersSchema);
-var Tokens = mongoose.model(TokenCollectionName);
 
 exports.add = function(rdata, callback) {
     var data = Querystring.parse(rdata);
@@ -90,11 +67,11 @@ exports.add = function(rdata, callback) {
                     console.log("try to add account.");
                     var newUser = new User();
                     newUser.account = account;
-                    var cipher  = crypto_pwd.createCipher('aes-256-cbc', SecrectKey)
+                    var cipher  = crypto_pwd.createCipher('aes-256-cbc', constant.secrectKey)
                     var cryptedpwd = cipher.update(password, 'utf8','hex');
                     cryptedpwd += cipher.final('hex');
                     console.log("--pwd---:" + cryptedpwd);
-                    //var decipher  = crypto_pwd.createDecipher('aes-256-cbc', SecrectKey)
+                    //var decipher  = crypto_pwd.createDecipher('aes-256-cbc', constant.secrectKey)
                     //var decpwd = decipher.update(cryptedpwd, 'hex', 'utf8')
                     //decpwd += decipher.final('utf8');
                     //console.log("--pwdtext---:" + decpwd);
@@ -147,7 +124,7 @@ exports.signin = function(qdata, callback)
                 else
                 {
                     console.log("--password---:" + password);
-                    var decipher  = crypto_pwd.createDecipher('aes-256-cbc', SecrectKey)
+                    var decipher  = crypto_pwd.createDecipher('aes-256-cbc', constant.secrectKey)
                     var decpwd = decipher.update(doc.password, 'hex', 'utf8')
                     decpwd += decipher.final('utf8');
                     console.log("--pwdtext---:" + decpwd);
@@ -156,10 +133,10 @@ exports.signin = function(qdata, callback)
                     {
                         //succeed to sign in , and then return token
                         var expires = moment().add('days', 15).valueOf();
-                        var token = jwt.encode({ account: account, exp:expires}, tokenSecret);
+                        var token = jwt.encode({ account: account, exp:expires}, constant.tokenSecret);
                         console.log("--token---:" + token);
                         console.log("--expires---:" + expires);
-                        var decoded = jwt.decode(token, tokenSecret);
+                        var decoded = jwt.decode(token, constant.tokenSecret);
                         console.log("--decoded token---:" + decoded);
                         callback(null, token);
                     }
@@ -333,7 +310,7 @@ exports.findUserByDisplayName = function(name, callback){
 exports.checkTokenValid = function(account, token, callback){
 
     console.log("entry checkTokenValid--:");
-    var decoded = jwt.decode(token, tokenSecret);
+    var decoded = jwt.decode(token, constant.tokenSecret);
     if(decoded)
     {
         //console.log("--entry checkTokenValid decode token--:" + decoded);

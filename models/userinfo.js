@@ -136,21 +136,6 @@ exports.findAll = function (req, res, next) {
 }
 
 
-exports.updateById = function (req, res, next) {
-    var id = req.params.id;
-    var title = req.body.title || '';
-    title = title.trim();
-    if (!title) {
-        return res.render('error.html', {message: '标题是必须的'});
-    }
-    db.editTitle(id,title,function (err, result) {
-        if (err) {
-            return next(err);
-        }
-        res.redirect('/');
-    });
-};
-
 exports.updateByAccount = function (req, res, next) {
     console.log("enter update account");
     var account = req.params.id;
